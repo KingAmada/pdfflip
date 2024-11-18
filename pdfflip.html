@@ -21,8 +21,8 @@
         .book {
             width: 300px;
             height: 400px;
-            perspective: 1000px;
             position: relative;
+            perspective: 1000px;
         }
 
         .page {
@@ -52,6 +52,14 @@
 
         .page.back {
             transform: rotateY(180deg);
+        }
+
+        .flipped .front {
+            transform: rotateY(-180deg);
+        }
+
+        .flipped .back {
+            transform: rotateY(0deg);
         }
 
         .controls {
@@ -97,7 +105,7 @@
         // Variables
         let pdfDoc = null;
         let currentPage = 1;
-        let isFlipped = false;
+        const totalPages = 0;
 
         const book = document.getElementById('book');
         const frontPageDiv = document.getElementById('page-1');
@@ -136,44 +144,34 @@
             }
         });
 
-        // Handle flipping and page updates
-        function flipToNextPage() {
-            if (currentPage < pdfDoc.numPages) {
-                isFlipped = !isFlipped;
-                book.style.transform = isFlipped ? 'rotateY(-180deg)' : 'rotateY(0deg)';
-
+        // Flip the book and load new content
+        function flipBook(next = true) {
+            if (next && currentPage < pdfDoc.numPages) {
+                // Flip forward
+                book.classList.add('flipped');
                 setTimeout(() => {
-                    if (isFlipped) {
-                        currentPage++;
-                        renderPage(currentPage, frontPageDiv);
-                    } else {
-                        currentPage++;
-                        renderPage(currentPage, backPageDiv);
+                    currentPage++;
+                    renderPage(currentPage, frontPageDiv);
+                    if (currentPage < pdfDoc.numPages) {
+                        renderPage(currentPage + 1, backPageDiv);
                     }
-                }, 400); // Match with transition duration
-            }
-        }
-
-        function flipToPreviousPage() {
-            if (currentPage > 1) {
-                isFlipped = !isFlipped;
-                book.style.transform = isFlipped ? 'rotateY(-180deg)' : 'rotateY(0deg)';
-
+                }, 800); // Wait for animation
+            } else if (!next && currentPage > 1) {
+                // Flip backward
+                book.classList.remove('flipped');
                 setTimeout(() => {
-                    if (isFlipped) {
-                        currentPage--;
-                        renderPage(currentPage, frontPageDiv);
-                    } else {
-                        currentPage--;
-                        renderPage(currentPage, backPageDiv);
+                    currentPage--;
+                    renderPage(currentPage, backPageDiv);
+                    if (currentPage > 1) {
+                        renderPage(currentPage - 1, frontPageDiv);
                     }
-                }, 400); // Match with transition duration
+                }, 800); // Wait for animation
             }
         }
 
         // Button controls
-        document.getElementById('next').addEventListener('click', flipToNextPage);
-        document.getElementById('prev').addEventListener('click', flipToPreviousPage);
+        document.getElementById('next').addEventListener('click', () => flipBook(true));
+        document.getElementById('prev').addEventListener('click', () => flipBook(false));
     </script>
 
 </body>
